@@ -50,14 +50,24 @@ This application is designed to run on Vercel with Supabase PostgreSQL.
 
 4. **Deploy**
    - Trigger a deployment
-   - Migrations will run automatically during build
+   - The build will complete even if migrations can't run during build time
 
-5. **Seed the Database**
+5. **Run Migrations**
 
-   After first deployment, make a POST request to seed the admin user:
+   After deployment, run migrations via API:
 
    ```bash
-   curl -X POST https://your-app.vercel.app/api/seed \
+   curl -X POST https://system-fifty.vercel.app/api/migrate \
+     -H "Content-Type: application/json" \
+     -d '{"secret": "your-SEED_SECRET-value"}'
+   ```
+
+6. **Seed the Database**
+
+   After migrations complete, seed the admin user:
+
+   ```bash
+   curl -X POST https://system-fifty.vercel.app/api/seed \
      -H "Content-Type: application/json" \
      -d '{"secret": "your-SEED_SECRET-value"}'
    ```
