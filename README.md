@@ -50,11 +50,12 @@ This application is designed to run on Vercel with Supabase PostgreSQL.
 
 4. **Deploy**
    - Trigger a deployment
-   - The build will complete even if migrations can't run during build time
+   - Migrations will attempt to run during build (may fail if DATABASE_URL isn't set yet)
+   - If migrations fail during build, redeploy after setting DATABASE_URL
 
-5. **Run Migrations**
+5. **Verify Database Connection**
 
-   After deployment, run migrations via API:
+   Test the database connection:
 
    ```bash
    curl -X POST https://system-fifty.vercel.app/api/migrate \
@@ -62,9 +63,11 @@ This application is designed to run on Vercel with Supabase PostgreSQL.
      -d '{"secret": "your-SEED_SECRET-value"}'
    ```
 
+   If this fails, redeploy to run migrations during the build process.
+
 6. **Seed the Database**
 
-   After migrations complete, seed the admin user:
+   After database is connected and migrations have run, seed the admin user:
 
    ```bash
    curl -X POST https://system-fifty.vercel.app/api/seed \

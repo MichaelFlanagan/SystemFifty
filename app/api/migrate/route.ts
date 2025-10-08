@@ -1,8 +1,5 @@
 import { NextResponse } from 'next/server';
-import { exec } from 'child_process';
-import { promisify } from 'util';
-
-const execAsync = promisify(exec);
+import { prisma } from '@/lib/prisma';
 
 export async function POST(request: Request) {
   try {
@@ -25,34 +22,25 @@ export async function POST(request: Request) {
       );
     }
 
-    console.log('Running database migrations...');
+    console.log('Testing database connection...');
 
-    // Run migrations
-    const { stdout, stderr } = await execAsync('npx prisma migrate deploy');
-
-    console.log('Migration output:', stdout);
-    if (stderr) {
-      console.error('Migration errors:', stderr);
-    }
+    // Test database connection by running a simple query
+    await prisma.$queryRaw`SELECT 1`;
 
     return NextResponse.json({
-      message: 'Migrations completed successfully',
-      output: stdout,
-      warnings: stderr || null
+      message: 'Database connection successful. Migrations should have run during build time. If you need to run migrations manually, use: npx prisma migrate deploy locally or update the build script.',
+      note: 'This endpoint verifies the database is accessible. Actual migrations run during the Vercel build process via the build script.'
     });
   } catch (error) {
-    console.error('Migration error:', error);
+    console.error('Database connection error:', error);
 
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    const errorOutput = (error as any).stdout || '';
-    const errorDetails = (error as any).stderr || '';
 
     return NextResponse.json(
       {
-        error: 'Failed to run migrations',
+        error: 'Failed to connect to database',
         message: errorMessage,
-        output: errorOutput,
-        details: errorDetails
+        help: 'Make sure DATABASE_URL is correctly configured in Vercel environment variables and the database is accessible.'
       },
       { status: 500 }
     );
