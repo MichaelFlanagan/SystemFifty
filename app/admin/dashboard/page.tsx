@@ -31,30 +31,11 @@ type SiteImages = {
 export default function DashboardPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
+
+  // All hooks must be at the top, before any conditional returns
   const [pick, setPick] = useState<Pick | null>(null);
   const [siteImages, setSiteImages] = useState<SiteImages | null>(null);
   const [loading, setLoading] = useState(true);
-
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/admin/login");
-    }
-  }, [status, router]);
-
-  // Show loading while checking authentication
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
-      </div>
-    );
-  }
-
-  // Don't render if not authenticated
-  if (!session) {
-    return null;
-  }
 
   // Pick form state
   const [title, setTitle] = useState("");
@@ -72,9 +53,12 @@ export default function DashboardPage() {
   const [roiTitle, setRoiTitle] = useState("");
   const [uploadingSiteImage, setUploadingSiteImage] = useState<string | null>(null);
 
+  // Redirect if not authenticated
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (status === "unauthenticated") {
+      router.push("/admin/login");
+    }
+  }, [status, router]);
 
   const fetchData = async () => {
     try {
@@ -107,6 +91,27 @@ export default function DashboardPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (session) {
+      fetchData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session]);
+
+  // Show loading while checking authentication
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  // Don't render if not authenticated
+  if (!session) {
+    return null;
+  }
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
