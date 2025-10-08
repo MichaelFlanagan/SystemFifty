@@ -14,52 +14,59 @@ A Next.js application for managing and displaying sports betting picks with an a
 ## Tech Stack
 
 - **Framework**: Next.js 15 with App Router
-- **Database**: SQLite with Prisma ORM
+- **Database**: PostgreSQL with Prisma ORM
 - **Authentication**: NextAuth v5
 - **UI Components**: Shadcn UI + Radix UI
 - **Styling**: Tailwind CSS
 - **Language**: TypeScript
+- **Deployment**: Vercel with Supabase PostgreSQL
 
-## Getting Started
+## Deployment (Vercel)
 
-### Prerequisites
+This application is designed to run on Vercel with Supabase PostgreSQL.
 
-- Node.js 18+ installed
-- npm or yarn
+### Initial Setup
 
-### Installation
+1. **Deploy to Vercel**
+   - Push your code to GitHub
+   - Import the repository in Vercel
+   - Vercel will automatically detect Next.js
 
-1. Clone the repository and install dependencies:
+2. **Set up Supabase Database**
+   - In your Vercel project, go to Storage
+   - Create a PostgreSQL database (Supabase)
+   - The `DATABASE_URL` will be automatically added to your environment variables
 
-```bash
-npm install
-```
+3. **Add Required Environment Variables**
 
-2. Set up the database:
+   In Vercel Project Settings → Environment Variables, add:
 
-```bash
-npx prisma migrate dev
-```
+   ```
+   NEXTAUTH_SECRET=<generate with: openssl rand -base64 32>
+   NEXTAUTH_URL=https://your-app.vercel.app
+   SEED_SECRET=<any random secret string>
+   RESEND_API_KEY=<optional, for contact form>
+   ```
 
-3. Seed the admin user:
+4. **Deploy**
+   - Trigger a deployment
+   - Migrations will run automatically during build
 
-```bash
-npm run seed
-```
+5. **Seed the Database**
 
-This creates an admin account:
-- Email: `admin@systemfifty.com`
-- Password: `admin123`
+   After first deployment, make a POST request to seed the admin user:
 
-⚠️ **IMPORTANT**: Change this password after first login!
+   ```bash
+   curl -X POST https://your-app.vercel.app/api/seed \
+     -H "Content-Type: application/json" \
+     -d '{"secret": "your-SEED_SECRET-value"}'
+   ```
 
-4. Start the development server:
+   This creates an admin account:
+   - Email: `admin@systemfifty.com`
+   - Password: `admin123`
 
-```bash
-npm run dev
-```
-
-5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+   ⚠️ **IMPORTANT**: Change this password after first login!
 
 ## Usage
 
@@ -89,15 +96,13 @@ Only one pick can be active at a time. Setting a new pick as active automaticall
 
 ## Environment Variables
 
-The `.env` file contains:
+See `.env.example` for all required environment variables:
 
-```
-DATABASE_URL="file:./dev.db"
-AUTH_SECRET="your-secret-key-change-this-in-production"
-AUTH_TRUST_HOST="true"
-```
-
-For production, update `AUTH_SECRET` with a secure random string.
+- `DATABASE_URL` - PostgreSQL connection string (auto-added by Vercel)
+- `NEXTAUTH_SECRET` - Secret for NextAuth session encryption
+- `NEXTAUTH_URL` - Your application URL
+- `SEED_SECRET` - Secret for database seeding endpoint
+- `RESEND_API_KEY` - Optional, for contact form emails
 
 ## Project Structure
 
@@ -142,11 +147,11 @@ systemfifty/
 
 ## Scripts
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
+- `npm run build` - Run migrations and build for production
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
-- `npm run seed` - Seed database with admin user
+- `npm run seed` - Seed database (for local development)
+- `postinstall` - Automatically generates Prisma client
 
 ## License
 
