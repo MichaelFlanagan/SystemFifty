@@ -282,7 +282,7 @@ export default function DashboardPage() {
           {/* Today's Pick */}
           <Card className="bg-slate-800/50 border-slate-700">
             <CardHeader>
-              <CardTitle className="text-white">Today's Pick</CardTitle>
+              <CardTitle className="text-white">Today&apos;s Pick</CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
